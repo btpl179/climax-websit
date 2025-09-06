@@ -1,9 +1,116 @@
 // Climax Hosiery - Main JavaScript Functionality
 class ClimaxHosiery {
   constructor() {
+    this.initSplashScreen();
     this.init();
     this.initMobileScrollEnhancements();
     this.initDynamicContentScaling();
+    this.initDarkMode();
+    this.initThreeLineMotif();
+  }
+
+  // Loading Splash Screen
+  initSplashScreen() {
+    // Create splash screen if it doesn't exist
+    if (!document.querySelector('.loading-splash')) {
+      const splash = document.createElement('div');
+      splash.className = 'loading-splash';
+      splash.innerHTML = `
+        <div class="splash-content">
+          <img src="./assets/images/logo.png" alt="Climax Hosiery" class="splash-logo">
+          <div class="splash-lines">
+            <div class="splash-line"></div>
+            <div class="splash-line"></div>
+            <div class="splash-line"></div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(splash);
+      
+      // Hide splash after animations complete
+      setTimeout(() => {
+        splash.classList.add('fade-out');
+        setTimeout(() => {
+          if (document.body.contains(splash)) {
+            document.body.removeChild(splash);
+          }
+        }, 500);
+      }, 2500);
+    }
+  }
+
+  // Dark Mode Implementation
+  initDarkMode() {
+    // Create theme toggle button
+    const themeToggle = document.createElement('button');
+    themeToggle.className = 'theme-toggle';
+    themeToggle.setAttribute('aria-label', 'Toggle dark mode');
+    themeToggle.innerHTML = '<span class="theme-toggle-icon">🌙</span>';
+    document.body.appendChild(themeToggle);
+    
+    // Check for saved theme preference or default to light mode
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    this.setTheme(savedTheme);
+    
+    // Theme toggle event listener
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      this.setTheme(newTheme);
+    });
+  }
+  
+  setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    
+    // Update toggle icon
+    const toggleIcon = document.querySelector('.theme-toggle-icon');
+    if (toggleIcon) {
+      toggleIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+    }
+    
+    // Animate theme transition
+    document.body.style.transition = 'background-color 0.3s ease, color 0.3s ease';
+    setTimeout(() => {
+      document.body.style.transition = '';
+    }, 300);
+  }
+
+  // Three-Line Motif System
+  initThreeLineMotif() {
+    // Add three-line motif to key sections
+    const heroSection = document.querySelector('.hero');
+    const sectionTitles = document.querySelectorAll('.section-title');
+    
+    if (heroSection) {
+      heroSection.classList.add('three-lines');
+    }
+    
+    sectionTitles.forEach((title, index) => {
+      if (index % 2 === 0) {
+        title.classList.add('three-lines');
+      }
+    });
+    
+    // Animate three-lines on scroll
+    const observerOptions = {
+      threshold: 0.3,
+      rootMargin: '0px 0px -100px 0px'
+    };
+    
+    const motifObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.setProperty('--line-animation-delay', '0s');
+          entry.target.classList.add('animate-lines');
+        }
+      });
+    }, observerOptions);
+    
+    document.querySelectorAll('.three-lines').forEach(el => {
+      motifObserver.observe(el);
+    });
   }
 
   init() {
